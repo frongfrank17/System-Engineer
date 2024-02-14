@@ -41,11 +41,14 @@ systemctl status docker
 ![result](./images/Screenshot%202567-02-11%20at%2021.47.11.png)
 #### Deploy Apply
 - Setup phpmysql+mysql
-  - Create Folder 
+  - สร้าง forlder phpmysql
 ```bash
-mkdir phpmysql && cd ./phpmysql 
+mkdir phpmysql 
 ```
- - Create file:  docker-compose.yaml
+```bash
+cd ./phpmysql 
+```
+ - สร้างไฟล์ docker-compose.yaml
 ```bash
 vi docker-compose.yaml
 ```
@@ -61,7 +64,7 @@ docker ps -a
 result ตัวอย่าง
 ![result container image running](./images/Screenshot%202567-02-12%20at%2000.36.17.png)
 
-3). Install APP
+3). Nginx
 - Front-End
 [Link Ref ](https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/Nginx-PHP-FPM-config-example)
 install nginx
@@ -80,7 +83,7 @@ sudo apt-get install php8.1-fpm -y
 sudo systemctl status php8.1-fpm
 ```
 ![status nginx](./images/Screenshot%202567-02-14%20at%2000.20.11.png)
-set Config fill Nginx  ให้สามารถ Run Php ได้
+set Config file Nginx  ให้สามารถ Run Php ได้
 ```bash
 sudo vi /etc/nginx/sites-available/default
 ```
@@ -121,13 +124,17 @@ restart nginx
 ```bash
 sudo systemctl restart nginx
 ```
-set permission ให้ path เพื่อวาง /var/www/html
+set permission ให้ path เพื่อวาง file php /var/www/html
 ```bash
 sudo chmod -R 777 /var/www/html
 ```
+เข้าไปข้าง folder /var/www/html
+```bash 
+cd /var/www/html
+```
 Create fil :index.php
 ```bash
-vi ./index.php
+vi ./info.php
 ```
 และใส่ code เพื่อนำไปเทส
 
@@ -139,3 +146,29 @@ phpinfo();
 ลองเปิดหน้าเว็บ <IP-MECHINE> ตัวอย่าง 10.222.14.1
 ![status nginx](./images/Screenshot%202567-02-14%20at%2000.26.54.png)
 - Back-End
+สร้าง Folder backend-app
+```bash
+mkdir backend-app
+```
+เข้าไปข้าง Folder 
+```bash
+cd ./backend-app
+```
+สร้าง docker-compose.yaml และใส่ code ดังนี้
+```yaml
+version: '3.8'
+services:
+  backendapp:
+    container_name: backendapp
+    image: frongfrank17/ctv-pr:v.deploy1amd64
+    restart: always
+    environment:
+      DB: DBCTC
+      URL_DB: <IP-HOST>
+      PORT_DB: 3333
+      DB_USER: "root"
+      DB_PASSWORD: "P@ssw0rd"
+```
+```bash
+docker-compose up -d 
+```
