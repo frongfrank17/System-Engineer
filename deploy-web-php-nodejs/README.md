@@ -1,17 +1,16 @@
 # Deploy WEB-PHP NODE.js PHPMYADMIN MYSQL
 ### Prerequisites
- - Linux OS Ubunto v.20 
+ - Linux OS Ubunto v.20 (recommend)
  - web php 
  - node.js 
- - spec
+ - spec (recommend)
    - CPU 2 core 
    - RAM 4 GB
-   - DISK 50 GB
-### STEP 1 Set Tool บนเครื่อง Linux
-#### install docker
+   - DISK 100 GB
+#### INSTALL DOCKER
 [Link Docker official ](https://docs.docker.com/engine/install/ubuntu/)
 
-1). Install using the apt repository
+- Install using the apt repository
 ```bash
 # Add Docker's official GPG key:
 sudo apt-get update
@@ -29,8 +28,7 @@ sudo apt-get update
 ```
 
 ![result](./images/Screenshot%202567-02-11%20at%2021.41.11.png)
-2). Install the Docker packages.
- - Install docker engine docker-compose containerd
+-  Install  docker engine docker-compose containerd
 ```bash
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
@@ -39,9 +37,8 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 systemctl status docker
 ```
 ![result](./images/Screenshot%202567-02-11%20at%2021.47.11.png)
-#### Deploy Apply
-- Setup phpmysql+mysql
-  - สร้าง forlder phpmysql
+#### DEPLOY PHPMYADMIN+MYSQL
+- สร้าง folder phpmysql
 ```bash
 mkdir phpmysql 
 ```
@@ -52,22 +49,51 @@ cd ./phpmysql
 ```bash
 vi docker-compose.yaml
 ```
-ตัวอย่าง file : docker-compose.yaml ตาม folder  ที่เตรียมไว้ให้
+ - นำ script นี้ไปวางบน ไฟล์   docker-compose.yaml และ  save file 
+```yaml
+version: '3.8'
+
+services:
+
+  db:
+    container_name: db
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: P@ssw0rd
+      MYSQL_DATABASE: DBCTC
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: P@ssw0rd
+    ports:
+      - "3333:3306"
+      - "33363:33060"
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+```
 - ใช้คำสั่งเพื่อ up docker-compose.yaml
 ```bash
 docker compose up -d 
 ```
-check container 
+ - check docker container 
+
 ```bash
 docker ps -a 
 ```
+
 result ตัวอย่าง
 ![result container image running](./images/Screenshot%202567-02-12%20at%2000.36.17.png)
 
-3). Nginx
-- Front-End
+Nginx
+- 
 [Link Ref ](https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/Nginx-PHP-FPM-config-example)
-install nginx
+- install nginx
 ```bash
 sudo apt-get install nginx -y
 ```
@@ -75,7 +101,7 @@ sudo apt-get install nginx -y
 sudo systemctl status nginx
 ```
 ![status nginx](./images/Screenshot%202567-02-14%20at%2000.19.27.png)
-install php8.1-fpm
+- install php8.1-fpm
 ```bash
 sudo apt-get install php8.1-fpm -y
 ```
@@ -83,7 +109,7 @@ sudo apt-get install php8.1-fpm -y
 sudo systemctl status php8.1-fpm
 ```
 ![status nginx](./images/Screenshot%202567-02-14%20at%2000.20.11.png)
-set Config file Nginx  ให้สามารถ Run Php ได้
+ - setconfig Nginx
 ```bash
 sudo vi /etc/nginx/sites-available/default
 ```
@@ -120,11 +146,15 @@ server {
   }
 } # End of PHP FPM Nginx config example
 ```
+ใข้คำสั่ง Reset Config
+```bash
+nginx -t 
+```
 restart nginx
 ```bash
 sudo systemctl restart nginx
 ```
-set permission ให้ path เพื่อวาง file php /var/www/html
+set permission ให้ path เพื่อสามารถนำไฟล์วางบน /var/www/html
 ```bash
 sudo chmod -R 777 /var/www/html
 ```
@@ -143,10 +173,11 @@ vi ./info.php
 phpinfo(); 
 ?>
 ```
-ลองเปิดหน้าเว็บ <IP-MECHINE> ตัวอย่าง 10.222.14.1
+
+ลองเปิดหน้าเว็บ <IP-MECHINE> ตัวอย่าง 10.222.14.1/info.php
 ![status nginx](./images/Screenshot%202567-02-14%20at%2000.26.54.png)
-- Back-End
-สร้าง Folder backend-app
+#### DEPLOY BACKEND-API
+- สร้าง Folder backend-app
 ```bash
 mkdir backend-app
 ```
@@ -169,6 +200,16 @@ services:
       DB_USER: "root"
       DB_PASSWORD: "P@ssw0rd"
 ```
+- คำอธิบาย environment
+```yaml
+  - IP-HOST คือ IP ของเครื่อง server DB คือ ชื่อ database ที่ set ไว้บนไฟล์ docker-compose.yaml ของ phpmyadmin 
+  - URL_DB  คือ IP-HOST 
+  - PORT_DB คือ PORT ที่ run mysql
+  - DB_USER คือ username  ที่เอาไว้เข้าใช้งาน database
+  - DB_PASSWORD คือ password ที่เอาไว้เข้าใช้งาน mysql
+```
+- ใช้คำสั่ง docker compose up -d 
+
 ```bash
 docker-compose up -d 
 ```
